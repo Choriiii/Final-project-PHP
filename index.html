@@ -3,9 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Restaurant Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+        }
+        header {
+            background-color: #d84315;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .product {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .product img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .product h3 {
+            margin: 10px 0;
+        }
+        .product p {
+            padding: 0 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .price {
+            font-size: 18px;
+            color: #d84315;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    
+
+    <header>
+        <h1>Restaurant Menu</h1>
+    </header>
+
+    <section class="menu">
+        <div class="product">
+            <img src="https://via.placeholder.com/300x180" alt="Classic Burger">
+            <h3>Classic Burger</h3>
+            <p>Juicy beef patty, cheddar cheese, fresh lettuce, and tomato.</p>
+            <div class="price">$8.50</div>
+        </div>
+        
+        <div class="product">
+            <img src="https://via.placeholder.com/300x180" alt="Margherita Pizza">
+            <h3>Margherita Pizza</h3>
+            <p>Handmade dough, tomato sauce, mozzarella, and fresh basil.</p>
+            <div class="price">$10.00</div>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x180" alt="Caesar Salad">
+            <h3>Caesar Salad</h3>
+            <p>Romaine lettuce, Caesar dressing, croutons, and parmesan cheese.</p>
+            <div class="price">$6.75</div>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x180" alt="Tacos al Pastor">
+            <h3>Tacos al Pastor</h3>
+            <p>Marinated pork, pineapple, onion, and cilantro in corn tortillas.</p>
+            <div class="price">$7.25</div>
+        </div>
+    </section>
+    <section>
+        <form action="index.php" method="post" enctype="multipart/form-data">
+            <h2>Add Products</h2>
+            <input type="text" name="newPName" id="newPName" placeholder="Product Name" required>
+            <input type="text" name="newPName" id="newPName" placeholder="Description" required>
+            <input type="text" name="newPName" id="newPName" placeholder="Price" required>
+            <input type="submit" value="Upload Image" name="submit" required>
+        </form>
+        <form action="index.php" method="post" enctype="multipart/form-data">
+            <h2>Edit Products</h2>
+            <input type="text" name="pName" id="pName" placeholder="Product Name">
+            <input type="text" name="pName" id="pName" placeholder="Description">
+            <input type="text" name="pName" id="pName" placeholder="Price">
+            <input type="submit" value="Upload Image" name="submit">
+        </form>
+    </section>
+
 </body>
 </html>
