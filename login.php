@@ -1,8 +1,8 @@
 <?php
 session_start();
 require("./db_connect.php");
-if (isset($_SESSION['username'])) {
-    header("Location: index.html");
+if (isset($_SESSION['email'])) {
+    header("Location: index.php");
     exit;
 }
 
@@ -27,7 +27,7 @@ try {
                 if ($users['Role'] === $userrole) {
                     $_SESSION['email'] = $email;
                     $_SESSION['userrole'] = $userrole;
-                    header("Location: index.html");
+                    header("Location: index.php");
                     exit;
                 } else {
                     echo "Your role is wrong. Choose the correct role.";

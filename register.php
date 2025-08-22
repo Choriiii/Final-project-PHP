@@ -32,7 +32,7 @@ try {
 
             $_SESSION['email'] = $email;
             $_SESSION['userrole'] = $userrole;
-            header("Location: index.html");
+            header("Location: index.php");
             exit;
         }
         $insertPrep->close();
