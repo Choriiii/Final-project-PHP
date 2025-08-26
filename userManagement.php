@@ -42,6 +42,7 @@ try {
                 echo "<td><a href='./userEdit.php?UserID=$users[UserID]'>Edit</a></td>";
                 echo "<td>
                 <form method='POST' action='deleteUser.php' onSubmit=\"return confirm('You gonna realy delete this user?');\">
+                <input type='hidden' name='UserID' value='".$users['UserID']."'></input>
                 <button type='submit'>Delete</button></form></td>";
                 echo "</tr>";
             }
