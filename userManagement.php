@@ -47,9 +47,10 @@ try {
                 echo "</tr>";
             }
         } else {
-            echo "No user found.";
+            echo "No user found.";//ここ修正ね
         };
         ?>
+        <tr><a href='./userEdit.php?UserID='>Add User</a><tr>
     </table>
 </body>
 

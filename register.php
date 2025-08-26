@@ -1,17 +1,17 @@
 <?php
 session_start();
+require("./db_connect.php");
+$dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require("./db_connect.php");
-
         $userrole = $_POST['role'];
         $username = $_POST['username'];
         $email = $_POST['email'];
         $password = $_POST['password'];
         $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
+
         if ($dbCon->connect_error) {
             throw new Exception("DB error.", 500);
         }
@@ -33,8 +33,6 @@ try {
             exit;
         }
         $insertPrep->close();
-    }elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo "GET request";
     }
 } catch (Exception $err) {
     echo $err->getMessage();

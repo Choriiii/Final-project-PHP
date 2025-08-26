@@ -1,5 +1,5 @@
 <?php
-interface Authorizable{//You shoulc always have these function!
+interface Authorizable{//You should always have these function!
     public function getRole();
     public function getID();
     public function can($permission, ?int $resourseOwnerID=null):bool;
@@ -71,18 +71,16 @@ class UserManager{
             return true;
         }
     }
+    public function user_add(User $act, $newData){
+        if(!$act->can('userAdd')){
+            return false;
+        }else{
+            $sql = $this->db->prepare("INSERT INTO userdata(UserName, EmailAddress, Password, Role) VALUE (?,?,?,?)");
+            $sql->bind_param("ssss",$newData['UserName'],$newData['EmailAddress'],$newData['Password'],$newData['Role']);
+            $sql->execute();
+            $sql->close();
+
+            return true;
+        }
+    }
 }
-//Class for managing post data
-/*
-親User
-：全機能(adminが使えるすべての機能)(こいつを子ごとに入れたり入れなかったり調整)
-　-商品の追加・編集・削除、ユーザーデータの編集、audit logの閲覧、
-　 user権限の変更(これできるのかな...?)→user管理ページ作ればいけるわ
-
-子
-Admin:全権限
-Editor:商品の操作
-Viewer:全権限なし
-
-多分class Userじゃなくて、editorにして、そこから拡張がいいかもしれない...継承使うなら(要確認)
-*/

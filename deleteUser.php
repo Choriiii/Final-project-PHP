@@ -1,7 +1,7 @@
 <?php
 session_start();
-require("./classes/UserManager.php");
 require("./db_connect.php");
+require("./classes/UserManager.php");
 if($_SERVER["REQUEST_METHOD"]==="POST"){
     $userID=$_POST['UserID'];
 
