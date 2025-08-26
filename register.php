@@ -9,11 +9,8 @@ try {
         $username = $_POST['username'];
         $email = $_POST['email'];
         $password = $_POST['password'];
-
         $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        //ここにユーザー判別用のquery: $sql = "SELECT * FROM userdata WHERE EmailAddress = ?";　ifこれが存在しなかったら
-        //以下のコードいらない箇所も多そうなので要修正
         $dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
         if ($dbCon->connect_error) {
             throw new Exception("DB error.", 500);
@@ -62,6 +59,7 @@ try {
         <h1>Sign up</h1>
         <form action="register.php" method="post">
             <select name="role" id="">
+                <option value="" selected disabled>--Select--</option>
                 <option value="admin">Admin</option>
                 <option value="editor">Editor</option>
                 <option value="viewer">Viewer</option>

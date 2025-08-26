@@ -25,6 +25,7 @@ try {
             //if the user have an account
             if (password_verify($password, $users['Password'])) {
                 if ($users['Role'] === $userrole) {
+                    $_SESSION['UserID']=$users['UserID'];
                     $_SESSION['email'] = $email;
                     $_SESSION['userrole'] = $userrole;
                     header("Location: index.php");
@@ -38,7 +39,7 @@ try {
         } else {
             echo "You don't have account.";
         }
-        $insertPrep->close(); //ここでcloseでいいのか
+        $insertPrep->close(); 
     }
 } catch (Exception $err) {
     echo $err->getMessage();
