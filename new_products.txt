@@ -1,6 +1,0 @@
-[2025-08-13 03:52:45] - IP: ::1 - User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 - null
-[2025-08-13 03:53:08] - IP: ::1 - User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 - {
-    "name": "banana",
-    "description": "banana",
-    "price": 20
-}
