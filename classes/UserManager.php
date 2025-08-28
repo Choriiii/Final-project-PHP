@@ -1,7 +1,5 @@
 <?php
 interface Authorizable{//You should always have these function!
-    public function getRole();
-    public function getID();
     public function can($permission, ?int $resourseOwnerID=null):bool;
 }
 abstract class User implements Authorizable{
@@ -12,34 +10,27 @@ abstract class User implements Authorizable{
         $this->id=$id;
         $this->role=$role;
     }
-    
-    public function getID(){return $this->id;}//こいつらいるの？？？？？
-    public function getRole(){return $this->role;}//こいつらいるの？？？？？
 
-    abstract public function can($permission, ? int $resourseOwnerID=null):bool;//こいつなに？
+    abstract public function can($permission, ? int $resourseOwnerID=null):bool;//always return true or false depends witch permission u have
 }
-class Admin extends User{
+class Admin extends User{//u can do anything with this Admin User
     public function can($permission, ?int $resourseOwnerID=null):bool{
         return true;
     }
 };
 class Editor extends User{
     public function can($permission, ?int $resourseOwnerID=null):bool{
-        if($permission==='view_post' && $resourseOwnerID === $this->id) return true;        
+        if($permission==='userEdit' && $resourseOwnerID === $this->id) return true;//if it's your userData, u can edit it.        
         return false;
     }
 }
 class Viewer extends User{
     public function can($permission, ?int $resourseOwnerID=null):bool{
-        if($permission==='view_post')return true;
+        if($permission==='view_post')return true;//you can only view the posts.
         return false; 
     }
 }
 
-//manage the DB connection
-class DataBase{
-
-}
 
 class UserManager{
     private $db;
@@ -47,7 +38,7 @@ class UserManager{
     {
         $this->db=$db;
     }
-    public function user_edit(User $act, int $userID, $newData){
+    public function user_edit(User $act, int $userID, $newData){//function for user data editing
         if(!$act->can('userEdit',$userID)) {
             return false;
         }else{

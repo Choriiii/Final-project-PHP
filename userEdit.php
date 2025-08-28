@@ -1,17 +1,18 @@
 <?php
+date_default_timezone_set("America/Vancouver");
 session_start();
-require("./db_connect.php");
+require("./config.php");
 require("./classes/UserManager.php");
 $emailSession = $_SESSION['email'];
 $db = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 $userID = isset($_GET["UserID"]) && $_GET["UserID"] !== '' ? (int)$_GET["UserID"] : null; //userID from query string
 
 $userData = [
-                'UserName' => '',
-                'EmailAddress' => '',
-                'Password' => '',
-                'Role' => 'viewer'
-            ];
+    'UserName' => '',
+    'EmailAddress' => '',
+    'Password' => '',
+    'Role' => 'viewer'
+];
 
 try {
     if ($db->connect_error) {
@@ -46,14 +47,14 @@ try {
             $sql->bind_param("i", $userID);
             $sql->execute();
             $result = $sql->get_result();
-            $userData = $result->fetch_assoc();//ここのデータをhtmlでも使いたい
+            $userData = $result->fetch_assoc(); //ここのデータをhtmlでも使いたい
             $sql->close();
         }
     } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
         $name = $_POST['username'];
         $email = $_POST['email'];
         $role = $_POST['role'];
-        
+
 
         if ($userID) {
             $update = $manager->user_edit($actingUser, $userID, [
@@ -66,17 +67,22 @@ try {
                 $_SESSION['userrole'] = $role;
             };
             $action = "edit_userID=$userID's data";
-            
         } else {
             $password = $_POST['password'];
-            $hashPassword = password_hash($password, PASSWORD_DEFAULT);
-            $add = $manager->user_add($actingUser, [
-                "UserName" => $name,
-                "EmailAddress" => $email,
-                "Password" => $hashPassword,
-                "Role" => $role
-            ]);
-            $action = "add new user!";
+            if (strlen($password) < 8) {
+                $pass_err_mgs = "Password must have at least 8 characters.";
+            } else if (!preg_match('/[0-9]/', $password)) {
+                $pass_err_mgs = "You must include at least one number.";
+            } else {
+                $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+                $add = $manager->user_add($actingUser, [
+                    "UserName" => $name,
+                    "EmailAddress" => $email,
+                    "Password" => $hashPassword,
+                    "Role" => $role
+                ]);
+                $action = "add new user!";
+            }
         }
         //audit record data
         $timestamp = date("Y-m-d H:i:s");
@@ -92,12 +98,11 @@ try {
         exit;
     }
 } catch (Exception $err) {
-    echo $err->getMessage();
     http_response_code($err->getCode());
-    
+
     $logfile = __DIR__ . "/errorLog.txt";
-    $currentTime=date("Y-m-d H:i:s");
-    $errorMsg="[{$currentTime}] Code: {$err->getCode()} - {$err->getMessage()}\n";
+    $currentTime = date("Y-m-d H:i:s");
+    $errorMsg = "[{$currentTime}] Code: {$err->getCode()} - {$err->getMessage()}\n";
 
     file_put_contents($logfile, $errorMsg, FILE_APPEND);
 }
@@ -115,6 +120,13 @@ try {
 </head>
 
 <body>
+    <p style="color: #d84315; margin:1rem 0; text-decoration: underline;"><strong>
+            <?php
+            if(isset($pass_err_mgs)){
+                echo "⚠️".htmlspecialchars($pass_err_mgs);
+            }
+            ?>
+    </strong></p>
     <form method="post" action="userEdit.php?UserID=<?php echo $userID ? htmlspecialchars($userID) : ''; ?>">
         <?php
         echo "<label>Name: <input type='text' name='username' value='" . htmlspecialchars($userData['UserName']) . "'></label><br>";

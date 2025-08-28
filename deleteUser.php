@@ -1,6 +1,7 @@
 <?php
+date_default_timezone_set("America/Vancouver");
 session_start();
-require("./db_connect.php");
+require("./config.php");
 require("./classes/UserManager.php");
 try{
     if($_SERVER["REQUEST_METHOD"]==="POST"){
@@ -47,7 +48,7 @@ try{
     }
 }
 }catch(Exception $err){
-    echo $err->getMessage();
+    echo "Some error occured.";
     http_response_code($err->getCode());
 
     $logfile = __DIR__ . "/errorLog.txt";

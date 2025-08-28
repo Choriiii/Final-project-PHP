@@ -1,6 +1,7 @@
 <?php
+date_default_timezone_set("America/Vancouver");
 session_start();
-require("./db_connect.php");
+require("./config.php");
 $dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 
 try {
@@ -49,7 +50,7 @@ try {
         $insertPrep->close();
     }
 } catch (Exception $err) {
-    echo $err->getMessage();
+    echo "Some error occured.";
     http_response_code($err->getCode());
 
     $logfile = __DIR__ . "/errorLog.txt";

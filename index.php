@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+date_default_timezone_set("America/Vancouver");
 session_start();
 $userEmail=$_SESSION['email'];
 //if you aren't login---it changes the page automatically to the login-page
@@ -89,7 +90,7 @@ function addNewProduct(string $name, string $description, float $price,array $im
     $timestamp = date("Y-m-d H:i:s");
     $ip = $_SERVER['REMOTE_ADDR'];
     $userAgent = $_SERVER['HTTP_USER_AGENT'];
-    require("./db_connect.php");
+    require("./config.php");
     $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
             if($dbcon->connect_error){
                 throw new Exception("DB error", 500);
