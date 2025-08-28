@@ -94,6 +94,12 @@ try {
 } catch (Exception $err) {
     echo $err->getMessage();
     http_response_code($err->getCode());
+    
+    $logfile = __DIR__ . "/errorLog.txt";
+    $currentTime=date("Y-m-d H:i:s");
+    $errorMsg="[{$currentTime}] Code: {$err->getCode()} - {$err->getMessage()}\n";
+
+    file_put_contents($logfile, $errorMsg, FILE_APPEND);
 }
 
 
