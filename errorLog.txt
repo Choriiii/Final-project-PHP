@@ -1,0 +1,6 @@
+[2025-Aug-Thu 18:57:11] Code: 1045 - Access denied for user 'PHPAgent'@'localhost' (using password: YES)
+[2025-Aug-Thu 18:57:16] Code: 1045 - Access denied for user 'PHPAgent'@'localhost' (using password: YES)
+[2025-08-28 18:59:44] Code: 1045 - Access denied for user 'PHPAgent'@'localhost' (using password: YES)
+[2025-08-28 21:04:35] Code: 1048 - Column 'action' cannot be null
+[2025-08-28 21:05:55] Code: 1048 - Column 'action' cannot be null
+[2025-08-28 14:12:32] Code: 1048 - Column 'action' cannot be null

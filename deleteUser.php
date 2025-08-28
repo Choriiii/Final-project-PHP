@@ -1,6 +1,7 @@
 <?php
+date_default_timezone_set("America/Vancouver");
 session_start();
-require("./db_connect.php");
+require("./config.php");
 require("./classes/UserManager.php");
 try{
     if($_SERVER["REQUEST_METHOD"]==="POST"){
@@ -29,15 +30,32 @@ try{
     }
 
     $manager= new UserManager($db);
+    $action="deleted the user userID=$userID";
     $delete=$manager->user_delete($actingUser,$userID);
     if($delete){
+        //audit record data
+        $timestamp = date("Y-m-d H:i:s");
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        //for the audit record
+        $sql = $db->prepare("INSERT INTO audit_record(timestamp, ip, userAgent, action, UserID) VALUES (?,?,?,?,?)");
+        $sql->bind_param("ssssi", $timestamp, $ip, $userAgent, $action, $actingUserID);
+        $sql->execute();
+        $sql->close();
+
         header("Location: userManagement.php");
         exit;
     }
 }
 }catch(Exception $err){
-    echo $err->getMessage();
+    echo "Some error occured.";
     http_response_code($err->getCode());
+
+    $logfile = __DIR__ . "/errorLog.txt";
+    $currentTime=date("Y-m-d H:i:s");
+    $errorMsg="[{$currentTime}] Code: {$err->getCode()} - {$err->getMessage()}\n";
+
+    file_put_contents($logfile, $errorMsg, FILE_APPEND);
 }
 
 ?>

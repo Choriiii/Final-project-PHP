@@ -1,6 +1,7 @@
 <?php
+date_default_timezone_set("America/Vancouver");
 session_start();
-require("./db_connect.php");
+require("./config.php");
 if (isset($_SESSION['email'])) {
     header("Location: index.php");
     exit;
@@ -21,6 +22,7 @@ try {
         $insertPrep->execute();
         $result = $insertPrep->get_result();
         //check if you have account
+        $error_msg='';
         if ($users = $result->fetch_assoc()) {
             //if the user have an account
             if (password_verify($password, $users['Password'])) {
@@ -31,19 +33,25 @@ try {
                     header("Location: index.php");
                     exit;
                 } else {
-                    echo "Your role is wrong. Choose the correct role.";
+                    $error_msg="Your role is wrong. Choose the correct role.";
                 }
             } else {
-                echo "Your email or password is wrong.";
+                $error_msg="Your email or password is wrong.";
             }
         } else {
-            echo "You don't have account.";
+            $error_msg="You don't have account.";
         }
         $insertPrep->close(); 
     }
 } catch (Exception $err) {
-    echo $err->getMessage();
+    echo "Some error occured.";
     http_response_code($err->getCode());
+
+    $logfile = __DIR__ . "/errorLog.txt";
+    $currentTime=date("Y-m-d H:i:s");
+    $errorMsg="[{$currentTime}] Code: {$err->getCode()} - {$err->getMessage()}\n";
+
+    file_put_contents($logfile, $errorMsg, FILE_APPEND);
 }
 
 ?>
@@ -72,6 +80,13 @@ try {
             <input type="password" name="password" placeholder="password" required>
             <button class="formButton">Login</button>
         </form>
+        <p style="color: #d84315; margin:1rem 0; text-decoration: underline;"><strong>
+            <?php
+            if(isset($error_msg)){
+                echo "⚠️".htmlspecialchars($error_msg);
+            }
+            ?>
+        </strong></p>
         <p>You don't have your account? <a href="./register.php">Signup here</a></p>
     </section>
 </body>
