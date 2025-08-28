@@ -1,5 +1,12 @@
 <?php
 declare(strict_types=1);
+session_start();
+//if you aren't login---it changes the page automatically to the login-page
+if(!isset($_SESSION['email'])){
+    header("Location: login.php");
+    exit;
+};
+
 $products = [
     [
         "name" => "Classic Burger",
@@ -111,7 +118,7 @@ function addNewProduct(string $name, string $description, float $price,array $im
 }
     }
 function displayNewProducts(){
-    if (!file_exists("new_products.txt") || filesize("new_products.txt")=== 0){
+    if (!file_exists("new_products.txt") || filesize("new_products.txt"=== 0)){
         return [];
     }else{
         $open_new_products = fopen("new_products.txt","r") or die ("Unable to open file");
@@ -208,6 +215,10 @@ $new_products=displayNewProducts();
 
     <header>
         <h1>Restaurant Menu</h1>
+    <!--This form/button is for testing the logout function is working, you can erase or change the place!-->
+        <form action="logout.php" method="post">
+            <button type="submit">Logout</button>
+        </form>
     </header>
 
     <section class="menu">
