@@ -21,57 +21,67 @@ switch ($actingUserRole) {
         die("Invalid session user.");
 };
 
-$manager = new UserManager($db);
-if (!$actingUser->can("userEdit", $actingUserID)) {
-    echo "You don't have accessibility.";
-} elseif (!$actingUser->can("userAdd", $actingUserID)) {
-    echo "You don't have accessibility";
-}
-if ($_SERVER["REQUEST_METHOD"] === "GET") {
-    if ($userID) {
-        $sql = $db->prepare("SELECT * FROM userdata WHERE UserID=?");
-        $sql->bind_param("i", $userID);
-        $sql->execute();
-        $result = $sql->get_result();
-        $userData = $result->fetch_assoc();
-        $sql->close();
-    } else {
-        $userData = [
-            'UserName' => '',
-            'EmailAddress' => '',
-            'Password' => '',
-            'Role' => 'viewer'
-        ];
+try {
+    if($db->connect_error){
+        throw new Exception("DB error.", 500);
     }
-} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name = $_POST['username'];
-    $email = $_POST['email'];
-    $role = $_POST['role'];
-    $password = $_POST['password'];
-    $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    if ($userID) {
-        $update = $manager->user_edit($actingUser, $userID, [
-            "UserName" => $name,
-            "EmailAddress" => $email,
-            "Role" => $role
-        ]);
-        if ($update && $userID === $actingUserID) {
-            $_SESSION['email'] = $email;
-            $_SESSION['userrole'] = $role;
+    $manager = new UserManager($db);
+    if (!$actingUser->can("userEdit", $actingUserID)) {
+        echo "You don't have accessibility.";
+    } elseif (!$actingUser->can("userAdd", $actingUserID)) {
+        echo "You don't have accessibility";
+    }
+    if ($_SERVER["REQUEST_METHOD"] === "GET") {
+        if ($userID) {
+            $sql = $db->prepare("SELECT * FROM userdata WHERE UserID=?");
+            $sql->bind_param("i", $userID);
+            $sql->execute();
+            $result = $sql->get_result();
+            $userData = $result->fetch_assoc();
+            $sql->close();
+        } else {
+            $userData = [
+                'UserName' => '',
+                'EmailAddress' => '',
+                'Password' => '',
+                'Role' => 'viewer'
+            ];
         }
-    } else {
-        $add = $manager->user_add($actingUser, [
-            "UserName" => $name,
-            "EmailAddress" => $email,
-            "Password"=>$hashPassword,
-            "Role" => $role
-        ]);
-    }
+    } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
+        $name = $_POST['username'];
+        $email = $_POST['email'];
+        $role = $_POST['role'];
+        $password = $_POST['password'];
+        $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    header("Location: userManagement.php");
-    exit;
+        if ($userID) {
+            $update = $manager->user_edit($actingUser, $userID, [
+                "UserName" => $name,
+                "EmailAddress" => $email,
+                "Role" => $role
+            ]);
+            if ($update && $userID === $actingUserID) {
+                $_SESSION['email'] = $email;
+                $_SESSION['userrole'] = $role;
+            }
+        } else {
+            $add = $manager->user_add($actingUser, [
+                "UserName" => $name,
+                "EmailAddress" => $email,
+                "Password" => $hashPassword,
+                "Role" => $role
+            ]);
+        }
+
+        header("Location: userManagement.php");
+        exit;
+    }
+} catch (Exception $err) {
+    echo $err->getMessage();
+    http_response_code($err->getCode());
 }
+
 
 ?>
 
@@ -91,8 +101,6 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         echo "<label>EmailAddress: <input type='text' name='email' value='" . htmlspecialchars($userData['EmailAddress']) . "'></label><br>";
         if (!$userID) {
             echo "<label>Password: <input type='password' name='password' required></label><br>";
-        }elseif($userID===$actingUserID){
-            echo "<label>New Password: <input type='password' name='password' required></label><br>";
         }
         ?>
         <select name='role'>
