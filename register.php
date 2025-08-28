@@ -1,6 +1,6 @@
 <?php
 session_start();
-require("./db_connect.php");
+require("./config.php");
 $dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 
 try {
