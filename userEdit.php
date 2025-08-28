@@ -2,29 +2,37 @@
 session_start();
 require("./db_connect.php");
 require("./classes/UserManager.php");
+$emailSession = $_SESSION['email'];
 $db = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 $userID = isset($_GET["UserID"]) && $_GET["UserID"] !== '' ? (int)$_GET["UserID"] : null; //userID from query string
 
-$actingUserID = $_SESSION['UserID']; //login userID
-$actingUserRole = $_SESSION['userrole']; //login userdata
-switch ($actingUserRole) {
-    case 'admin':
-        $actingUser = new Admin($actingUserID, $actingUserRole);
-        break;
-    case 'editor':
-        $actingUser = new Editor($actingUserID, $actingUserRole);
-        break;
-    case 'viewer':
-        $actingUser = new Viewer($actingUserID, $actingUserRole);
-        break;
-    default:
-        die("Invalid session user.");
-};
+$userData = [
+                'UserName' => '',
+                'EmailAddress' => '',
+                'Password' => '',
+                'Role' => 'viewer'
+            ];
 
 try {
-    if($db->connect_error){
+    if ($db->connect_error) {
         throw new Exception("DB error.", 500);
     }
+    $actingUserID = $_SESSION['UserID']; //login userID
+
+    $actingUserRole = $_SESSION['userrole']; //login userdata
+    switch ($actingUserRole) {
+        case 'admin':
+            $actingUser = new Admin($actingUserID, $actingUserRole);
+            break;
+        case 'editor':
+            $actingUser = new Editor($actingUserID, $actingUserRole);
+            break;
+        case 'viewer':
+            $actingUser = new Viewer($actingUserID, $actingUserRole);
+            break;
+        default:
+            die("Invalid session user.");
+    };
 
     $manager = new UserManager($db);
     if (!$actingUser->can("userEdit", $actingUserID)) {
@@ -38,22 +46,14 @@ try {
             $sql->bind_param("i", $userID);
             $sql->execute();
             $result = $sql->get_result();
-            $userData = $result->fetch_assoc();
+            $userData = $result->fetch_assoc();//ここのデータをhtmlでも使いたい
             $sql->close();
-        } else {
-            $userData = [
-                'UserName' => '',
-                'EmailAddress' => '',
-                'Password' => '',
-                'Role' => 'viewer'
-            ];
         }
     } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
         $name = $_POST['username'];
         $email = $_POST['email'];
         $role = $_POST['role'];
-        $password = $_POST['password'];
-        $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+        
 
         if ($userID) {
             $update = $manager->user_edit($actingUser, $userID, [
@@ -64,15 +64,29 @@ try {
             if ($update && $userID === $actingUserID) {
                 $_SESSION['email'] = $email;
                 $_SESSION['userrole'] = $role;
-            }
+            };
+            $action = "edit_userID=$userID's data";
+            
         } else {
+            $password = $_POST['password'];
+            $hashPassword = password_hash($password, PASSWORD_DEFAULT);
             $add = $manager->user_add($actingUser, [
                 "UserName" => $name,
                 "EmailAddress" => $email,
                 "Password" => $hashPassword,
                 "Role" => $role
             ]);
+            $action = "add new user!";
         }
+        //audit record data
+        $timestamp = date("Y-m-d H:i:s");
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        //for the audit record
+        $sql = $db->prepare("INSERT INTO audit_record(timestamp, ip, userAgent, action, UserID) VALUES (?,?,?,?,?)");
+        $sql->bind_param("ssssi", $timestamp, $ip, $userAgent, $action, $actingUserID);
+        $sql->execute();
+        $sql->close();
 
         header("Location: userManagement.php");
         exit;

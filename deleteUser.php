@@ -29,8 +29,19 @@ try{
     }
 
     $manager= new UserManager($db);
+    $action="deleted the user userID=$userID";
     $delete=$manager->user_delete($actingUser,$userID);
     if($delete){
+        //audit record data
+        $timestamp = date("Y-m-d H:i:s");
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        //for the audit record
+        $sql = $db->prepare("INSERT INTO audit_record(timestamp, ip, userAgent, action, UserID) VALUES (?,?,?,?,?)");
+        $sql->bind_param("ssssi", $timestamp, $ip, $userAgent, $action, $actingUserID);
+        $sql->execute();
+        $sql->close();
+
         header("Location: userManagement.php");
         exit;
     }

@@ -1,5 +1,12 @@
 <?php
+session_start();
 require("./db_connect.php");
+$actingUserRole=$_SESSION['userrole'];
+$userID=$_SESSION['UserID'];
+if($actingUserRole!=="admin"){
+    header("Location: index.php");
+    exit;
+}
 try {
     $dbCon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
     if ($dbCon->connect_error) {
@@ -47,7 +54,7 @@ try {
                 echo "</tr>";
             }
         } else {
-            echo "No user found.";//ここ修正ね
+            echo "<h2>No user found.</h2>";
         };
         ?>
         <tr><a href='./userEdit.php?UserID='>Add User</a><tr>
