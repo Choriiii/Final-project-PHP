@@ -79,14 +79,6 @@ function addNewProduct(string $name, string $description, float $price,array $im
             $insertPrep->execute();
             $insertPrep->close();
 
-            /*get the userID from DB(this doesn't work properly yet. I wanted to get $userID for the audit record)
-            $insertPrep=$dbcon->prepare("SELECT UserID from userdata WHERE EmailAddress=?");
-            $insertPrep->bind_param("s",$userEmail);
-            $insertPrep->execute();
-            $insertPrep->bind_result($userID);
-            $insertPrep->fetch();
-            $insertPrep->close();*/
-
             // Insert en audit_record
             $action = "added: " . $new_product["name"];
             $email = $_SESSION['email'] ?? null;
@@ -100,10 +92,6 @@ function addNewProduct(string $name, string $description, float $price,array $im
             $stmt->close();
             $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action, userId) VALUES (?, ?, ?, ?, ?)");
             $insertPrep->bind_param("sssss", $timestamp, $ip, $userAgent, $action,$userId);
-
-            $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action, /*UserID*/) VALUES (?, ?, ?, ?, /*?*/)");
-            $insertPrep->bind_param("sssss", $timestamp, $ip, $userAgent, $action/*, $userID*/);//I add $userID here, but I'm not sure this will works....
-
             $insertPrep->execute();
 
             $insertPrep->close();
@@ -117,45 +105,10 @@ function addNewProduct(string $name, string $description, float $price,array $im
 
 function displayProducts(){
    require_once("./config.php");
-   $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
-   if ($dbcon->connect_error) {
-       throw new Exception("DB connection error", 500);
-   }
-
-   $sql = "SELECT * FROM products";
-   $result = $dbcon->query($sql);
-   $products = [];
-
-   if ($result) {
-       $products = $result->fetch_all(MYSQLI_ASSOC);
-   }
-
-   $dbcon->close();
-   return $products; // <-- esto debe existir y ser un array
-}
-function displayNewProducts(){
-   if (!file_exists("new_products.txt") || filesize("new_products.txt") === 0) {
-       return [];
-   }
-
-   $open_new_products = fopen("new_products.txt","r") or die ("Unable to open file");
-   $new_products = fread($open_new_products, filesize("new_products.txt"));
-   fclose($open_new_products);
-
-   $lines = explode(PHP_EOL, trim($new_products));
-   $products = [];
-
-   foreach ($lines as $line) {
-       if (trim($line) === "") continue;
-       $parts = explode(" - ", $line, 4);
-       if (isset($parts[3])){
-           $json = $parts[3];
-           $productData = json_decode($json, true);
-           if ($productData) {
-               $products[] = $productData;
-           }
-       }
-   }
+    $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
+    if ($dbcon->connect_error) {
+        throw new Exception("DB connection error", 500);
+    }
 
     $sql = "SELECT * FROM products";
     $result = $dbcon->query($sql);
