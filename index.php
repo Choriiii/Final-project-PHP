@@ -76,59 +76,41 @@ function addNewProduct(string $name, string $description, float $price, array $i
         $price = $new_product["price"];
         $image = $new_product["image"];
 
-        $insertPrep = $dbcon->prepare("INSERT INTO products (name, description, price, image) VALUES (?, ?, ?, ?)");
-        $insertPrep->bind_param("ssds", $name, $description, $price, $image);
-        $insertPrep->execute();
-        $insertPrep->close();
+            $insertPrep = $dbcon->prepare("INSERT INTO products (name, description, price, image) VALUES (?, ?, ?, ?)");
+            $insertPrep->bind_param("ssds", $name, $description, $price, $image);
+            $insertPrep->execute();
+            $insertPrep->close();
 
-        // Insert en audit_record
-        $action = "added: " . $new_product["name"];
+            // Insert en audit_record
+            $action = "added: " . $new_product["name"];
+            $email = $_SESSION['email'] ?? null;
 
-        $email = $_SESSION['email'] ?? null;
+            $sql = "SELECT userId FROM userdata WHERE EmailAddress = ?";//La consulta SQL
+            $stmt = $dbcon->prepare($sql);//Preparar la consulta
+            $stmt->bind_param("s", $email);//Asociar el valor al marcador ?
+            $stmt->execute();//Ejecutar la consulta
+            $result = $stmt->get_result();//Vincular el resultado a una variable
+            $userId = $result->fetch_assoc()['userId'] ?? null;//Obtener el resultado
+            $stmt->close();
+            $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action, userId) VALUES (?, ?, ?, ?, ?)");
+            $insertPrep->bind_param("sssss", $timestamp, $ip, $userAgent, $action,$userId);
+            $insertPrep->execute();
 
-        $sql = "SELECT userId FROM userdata WHERE EmailAddress = ?"; //La consulta SQL
-        $stmt = $dbcon->prepare($sql); //Preparar la consulta
-        $stmt->bind_param("s", $email); //Asociar el valor al marcador ?
-        $stmt->execute(); //Ejecutar la consulta
-        $result = $stmt->get_result(); //Vincular el resultado a una variable
-        $userId = $result->fetch_assoc()['userId'] ?? null; //Obtener el resultado
-        $stmt->close();
-        $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action, userId) VALUES (?, ?, ?, ?, ?)");
-        $insertPrep->bind_param("sssss", $timestamp, $ip, $userAgent, $action, $userId);
+            $insertPrep->close();
+            $dbcon->close();
 
-        $insertPrep->execute();
-
-        $insertPrep->close();
-        $dbcon->close();
-    } catch (Exception $err) {
-        echo $err->getMessage();
-        http_response_code($err->getCode());
-    }
+    }catch(Exception $err){
+    echo $err->getMessage();
+    http_response_code($err->getCode());
 }
+    }
 
-function displayProducts()
-{
-    require_once("./config.php");
+function displayProducts(){
+   require_once("./config.php");
     $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
     if ($dbcon->connect_error) {
         throw new Exception("DB connection error", 500);
     }
-
-    $sql = "SELECT * FROM products";
-    $result = $dbcon->query($sql);
-    $products = [];
-
-    if ($result) {
-        $products = $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    $dbcon->close();
-    return $products; // <-- esto debe existir y ser un array
-}
-function displayNewProducts()
-{
-    require_once("./config.php");
-    $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 
     $sql = "SELECT * FROM products";
     $result = $dbcon->query($sql);
@@ -248,7 +230,7 @@ if (isset($_POST['update_product'])) {
 
     editProduct($productID, $name, $description, $price, $_FILES['image']);
 }
-$products = displayNewProducts();
+$products = displayProducts();
 
 ?>
 <!DOCTYPE html>
