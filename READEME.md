@@ -25,6 +25,7 @@ define('DB_USERNAME','your_bd_username');
 define('DB_PASS','your_db_password');  
 define('DB_NAME','db_name');  
 3. Import Database Schema  
+Import the DB --- "final_project_php.sql" which is in "DataBase" File  
 
 
 
