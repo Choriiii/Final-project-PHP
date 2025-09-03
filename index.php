@@ -83,8 +83,19 @@ function addNewProduct(string $name, string $description, float $price, array $i
 
         // Insert en audit_record
         $action = "added: " . $new_product["name"];
-        $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action) VALUES (?, ?, ?, ?,)");
-        $insertPrep->bind_param("ssss", $timestamp, $ip, $userAgent, $action);
+
+        $email = $_SESSION['email'] ?? null;
+
+        $sql = "SELECT userId FROM userdata WHERE EmailAddress = ?"; //La consulta SQL
+        $stmt = $dbcon->prepare($sql); //Preparar la consulta
+        $stmt->bind_param("s", $email); //Asociar el valor al marcador ?
+        $stmt->execute(); //Ejecutar la consulta
+        $result = $stmt->get_result(); //Vincular el resultado a una variable
+        $userId = $result->fetch_assoc()['userId'] ?? null; //Obtener el resultado
+        $stmt->close();
+        $insertPrep = $dbcon->prepare("INSERT INTO audit_record (timestamp, ip, userAgent, action, userId) VALUES (?, ?, ?, ?, ?)");
+        $insertPrep->bind_param("sssss", $timestamp, $ip, $userAgent, $action, $userId);
+
         $insertPrep->execute();
 
         $insertPrep->close();
@@ -94,31 +105,30 @@ function addNewProduct(string $name, string $description, float $price, array $i
         http_response_code($err->getCode());
     }
 }
+
+function displayProducts()
+{
+    require_once("./config.php");
+    $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
+    if ($dbcon->connect_error) {
+        throw new Exception("DB connection error", 500);
+    }
+
+    $sql = "SELECT * FROM products";
+    $result = $dbcon->query($sql);
+    $products = [];
+
+    if ($result) {
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    $dbcon->close();
+    return $products; // <-- esto debe existir y ser un array
+}
 function displayNewProducts()
 {
-    if (!file_exists("new_products.txt") || filesize("new_products.txt") === 0) {
-        return [];
-    } else {
-        $open_new_products = fopen("new_products.txt", "r") or die("Unable to open file");
-        $new_products = fread($open_new_products, filesize("new_products.txt"));
-        fclose($open_new_products);
-
-        $lines = explode(PHP_EOL, trim($new_products)); //explode sirve para dividir una string usando un delimitador y se usa asi explode(string $delimitador, string $texto, int $limite = PHP_INT_MAX): array
-
-        $products = [];
-        foreach ($lines as $line) {
-            if (trim($line) === "") continue;
-            $parts = explode(" - ", $line, 4);
-            if (isset($parts[3])) {
-                $json = $parts[3];
-                $productData = json_decode($json, true);
-                if ($productData) {
-                    $products[] = $productData;
-                }
-            }
-        }
-        return $products;
-    }
+    require_once("./config.php");
+    $dbcon = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASS, DB_NAME);
 
     $sql = "SELECT * FROM products";
     $result = $dbcon->query($sql);
